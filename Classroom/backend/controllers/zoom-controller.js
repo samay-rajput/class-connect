@@ -5,19 +5,23 @@ const Token = require("./../models/TokenSchema");
 const Teacher = require("./../models/teacherSchema");
 const qs = require("qs");
 
+const zoomAccountId =
+  process.env.ZOOM_ACCOUNT_ID || "JE8w0e_-Qp6wzgbDVONWdQ";
+const zoomApiKey = process.env.ZOOM_API_KEY || "TpnsX7xOSySgMQt0oJ23uw";
+const zoomApiSecret =
+  process.env.ZOOM_API_SECRET || "QJpY4GFzp0u4mSnZbt053MpIHZCbwUzK";
+
 async function getAccessToken(req, res) {
   try {
     let token = await Token.find({});
     token = token[0]?.token;
     console.log("Aom", token);
-    let base64Url = Buffer.from(
-      `${process.env.ZOOM_API_KEY}:${process.env.ZOOM_API_SECRET}`
-    );
+    let base64Url = Buffer.from(`${zoomApiKey}:${zoomApiSecret}`);
     let base64String = base64Url.toString("base64");
 
     let data = qs.stringify({
       grant_type: "account_credentials",
-      account_id: "Gmvy1ozCStOZT9STO135VQ",
+      account_id: zoomAccountId,
     });
 
     let config = {
@@ -60,13 +64,15 @@ async function getAccessToken(req, res) {
   }
 }
 
+
 const AccessGen = async (req, res) => {
-  const clientId = process.env.ZOOM_API_KEY;
+  const clientId = zoomApiKey;
   const redirect_uri = encodeURIComponent(process.env.REDIRECT_URI);
   const responseType = "code";
   const authorizationUrl = `https://zoom.us/oauth/authorize?response_type=${responseType}&client_id=${clientId}&redirect_uri=${redirect_uri}`;
   res.redirect(authorizationUrl);
 };
+
 const callback = async (req, res) => {
   const code = req.query.code;
   if (!code) {
@@ -81,7 +87,7 @@ const callback = async (req, res) => {
       },
       headers: {
         Authorization: `Basic ${Buffer.from(
-          `${process.env.ZOOM_API_KEY}:${process.env.ZOOM_API_SECRET}`
+          `${zoomApiKey}:${zoomApiSecret}`
         ).toString("base64")}`,
         "Content-Type": "application/x-www-form-urlencoded",
       },
@@ -103,7 +109,7 @@ const refreshGen = async (req, res) => {
       },
       headers: {
         Authorization: `Basic ${Buffer.from(
-          `${process.env.ZOOM_API_KEY}:${process.env.ZOOM_API_SECRET}`
+          `${zoomApiKey}:${zoomApiSecret}`
         ).toString("base64")}`,
         "Content-Type": "application/x-www-form-urlencoded",
       },
